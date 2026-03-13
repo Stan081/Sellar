@@ -1,25 +1,9 @@
 import { Request, Response } from 'express';
 import path from 'path';
-import fs from 'fs';
 import multer from 'multer';
+import { put } from '@vercel/blob';
 
-const UPLOADS_DIR = path.join(process.cwd(), 'uploads');
-
-// Ensure uploads directory exists
-if (!fs.existsSync(UPLOADS_DIR)) {
-  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
-}
-
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
-    cb(null, UPLOADS_DIR);
-  },
-  filename: (_req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
-    cb(null, unique);
-  },
-});
+const storage = multer.memoryStorage();
 
 const fileFilter = (_req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
   const allowed = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
@@ -36,39 +20,64 @@ export const upload = multer({
   limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB
 });
 
-export const uploadImage = (req: Request, res: Response): void => {
+export const uploadImage = async (req: Request, res: Response): Promise<void> => {
   if (!req.file) {
     res.status(400).json({ error: 'No file uploaded' });
     return;
   }
 
-  const baseUrl = process.env.API_BASE_URL || `http://localhost:${process.env.PORT || 3001}`;
-  const url = `${baseUrl}/uploads/${req.file.filename}`;
+  try {
+    const ext = path.extname(req.file.originalname).toLowerCase();
+    const filename = `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
+    
+    const blob = await put(filename, req.file.buffer, {
+      access: 'public',
+      contentType: req.file.mimetype,
+    });
 
-  res.status(201).json({
-    url,
-    filename: req.file.filename,
-    originalname: req.file.originalname,
-    size: req.file.size,
-    mimetype: req.file.mimetype,
-  });
+    res.status(201).json({
+      url: blob.url,
+      filename,
+      originalname: req.file.originalname,
+      size: req.file.size,
+      mimetype: req.file.mimetype,
+    });
+  } catch (error) {
+    console.error('Upload error:', error);
+    res.status(500).json({ error: 'Failed to upload file' });
+  }
 };
 
-export const uploadMultipleImages = (req: Request, res: Response): void => {
+export const uploadMultipleImages = async (req: Request, res: Response): Promise<void> => {
   const files = req.files as Express.Multer.File[];
   if (!files || files.length === 0) {
     res.status(400).json({ error: 'No files uploaded' });
     return;
   }
 
-  const baseUrl = process.env.API_BASE_URL || `http://localhost:${process.env.PORT || 3001}`;
-  const urls = files.map((file) => ({
-    url: `${baseUrl}/uploads/${file.filename}`,
-    filename: file.filename,
-    originalname: file.originalname,
-    size: file.size,
-    mimetype: file.mimetype,
-  }));
+  try {
+    const uploadPromises = files.map(async (file) => {
+      const ext = path.extname(file.originalname).toLowerCase();
+      const filename = `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
+      
+      const blob = await put(filename, file.buffer, {
+        access: 'public',
+        contentType: file.mimetype,
+      });
 
-  res.status(201).json({ urls });
+      return {
+        url: blob.url,
+        filename,
+        originalname: file.originalname,
+        size: file.size,
+        mimetype: file.mimetype,
+      };
+    });
+
+    const results = await Promise.all(uploadPromises);
+    res.status(201).json({ urls: results });
+  } catch (error) {
+    console.error('Upload error:', error);
+    res.status(500).json({ error: 'Failed to upload files' });
+  }
 };

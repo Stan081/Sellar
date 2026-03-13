@@ -36,9 +36,6 @@ const limiter = rateLimit({
 });
 app.use('/api', limiter);
 
-// Static file serving for uploads
-app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
-
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
