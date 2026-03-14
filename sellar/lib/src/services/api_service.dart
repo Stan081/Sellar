@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
 import 'package:sellar/src/config/app_config.dart';
 import 'package:sellar/src/constants/app_constants.dart';
+import 'package:sellar/src/core/utils/error_handler.dart';
 
 /// API service for making HTTP requests
 class ApiService {
@@ -69,11 +70,15 @@ class ApiService {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
-    return _dio.get<T>(
-      path,
-      queryParameters: queryParameters,
-      options: options,
-    );
+    try {
+      return await _dio.get<T>(
+        path,
+        queryParameters: queryParameters,
+        options: options,
+      );
+    } catch (e) {
+      throw ErrorHandler.handleError(e);
+    }
   }
 
   /// POST request
@@ -83,12 +88,16 @@ class ApiService {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
-    return _dio.post<T>(
-      path,
-      data: data,
-      queryParameters: queryParameters,
-      options: options,
-    );
+    try {
+      return await _dio.post<T>(
+        path,
+        data: data,
+        queryParameters: queryParameters,
+        options: options,
+      );
+    } catch (e) {
+      throw ErrorHandler.handleError(e);
+    }
   }
 
   /// PUT request
@@ -98,12 +107,16 @@ class ApiService {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
-    return _dio.put<T>(
-      path,
-      data: data,
-      queryParameters: queryParameters,
-      options: options,
-    );
+    try {
+      return await _dio.put<T>(
+        path,
+        data: data,
+        queryParameters: queryParameters,
+        options: options,
+      );
+    } catch (e) {
+      throw ErrorHandler.handleError(e);
+    }
   }
 
   /// DELETE request
@@ -113,12 +126,16 @@ class ApiService {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
-    return _dio.delete<T>(
-      path,
-      data: data,
-      queryParameters: queryParameters,
-      options: options,
-    );
+    try {
+      return await _dio.delete<T>(
+        path,
+        data: data,
+        queryParameters: queryParameters,
+        options: options,
+      );
+    } catch (e) {
+      throw ErrorHandler.handleError(e);
+    }
   }
 
   /// Set authorization token

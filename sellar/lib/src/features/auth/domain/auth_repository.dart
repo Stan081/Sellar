@@ -62,30 +62,38 @@ class AuthRepository {
     required String identifier,
     required String password,
   }) async {
-    final response = await _apiService.post(
-      AppConstants.authLoginPath,
-      data: {
-        'identifier': identifier,
-        'password': password,
-      },
-    );
+    try {
+      final response = await _apiService.post(
+        AppConstants.authLoginPath,
+        data: {
+          'identifier': identifier,
+          'password': password,
+        },
+      );
 
-    if (response.statusCode == 200 && response.data != null) {
-      final data = response.data['data'] as Map<String, dynamic>;
-      final token = data['token'] as String;
-      final vendorData = data['vendor'] as Map<String, dynamic>;
+      if (response.statusCode == 200 && response.data != null) {
+        final data = response.data['data'] as Map<String, dynamic>;
+        final token = data['token'] as String;
+        final vendorData = data['vendor'] as Map<String, dynamic>;
 
-      // Save token and vendor ID
-      await _storageService.saveUserToken(token);
-      await _storageService.saveUserId(vendorData['id'] as String);
+        // Save token and vendor ID
+        await _storageService.saveUserToken(token);
+        await _storageService.saveUserId(vendorData['id'] as String);
 
-      // Set auth token in API service
-      _apiService.setAuthToken(token);
+        // Set auth token in API service
+        _apiService.setAuthToken(token);
 
-      return Vendor.fromJson(vendorData);
+        return Vendor.fromJson(vendorData);
+      }
+
+      throw Exception(response.data?['error'] ?? 'Login failed');
+    } catch (e) {
+      // Re-throw API exceptions directly, otherwise wrap in generic exception
+      if (e.toString().contains('ApiException')) {
+        rethrow;
+      }
+      throw Exception('Login failed: ${e.toString()}');
     }
-
-    throw Exception(response.data?['error'] ?? 'Login failed');
   }
 
   /// Get current vendor profile

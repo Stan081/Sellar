@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:sellar/src/theme/app_colors.dart';
 import 'package:sellar/src/features/auth/domain/auth_repository.dart';
 import 'package:sellar/src/services/app_services.dart';
+import 'package:sellar/src/core/utils/error_handler.dart';
 
 /// Business profile setup screen - collect business information
 class BusinessProfileScreen extends StatefulWidget {
@@ -60,8 +61,8 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
         firstName: _firstNameController.text.trim(),
         lastName: _lastNameController.text.trim(),
         country: _countryController.text.trim(),
-        currency: _currencyController.text.trim().isEmpty 
-            ? null 
+        currency: _currencyController.text.trim().isEmpty
+            ? null
             : _currencyController.text.trim(),
       );
 
@@ -69,7 +70,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
 
       // Navigate to main app
       context.go('/');
-      
+
       // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -79,9 +80,19 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
       );
     } catch (e) {
       if (!mounted) return;
+
+      // Get user-friendly error message
+      String userMessage;
+      try {
+        final apiException = ErrorHandler.handleError(e);
+        userMessage = ErrorHandler.getUserMessage(apiException);
+      } catch (_) {
+        userMessage = 'Something went wrong. Please try again.';
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(e.toString()),
+          content: Text(userMessage),
           backgroundColor: AppColors.error,
         ),
       );
@@ -103,6 +114,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   'Tell us about your business',
