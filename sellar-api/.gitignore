@@ -44,5 +44,4 @@ logs
 *.log
 
 # Prisma
-prisma/migrations/
 /generated/
