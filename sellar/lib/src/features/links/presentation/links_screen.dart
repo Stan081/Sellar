@@ -6,6 +6,7 @@ import 'package:sellar/src/features/products/domain/entities/product.dart';
 import 'package:sellar/src/services/app_services.dart';
 import 'package:sellar/src/theme/app_colors.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:sellar/src/features/links/presentation/widgets/product_search_dropdown.dart';
 
 /// Links screen - payment link management
 class LinksScreen extends StatefulWidget {
@@ -564,6 +565,7 @@ class _CreateLinkSheetState extends State<_CreateLinkSheet> {
   // Products
   List<Product> _products = [];
   bool _loadingProducts = true;
+  bool _productsError = false;
   Product? _selectedProduct;
 
   // Fields
@@ -584,15 +586,25 @@ class _CreateLinkSheetState extends State<_CreateLinkSheet> {
 
   Future<void> _loadProducts() async {
     try {
-      final products = await widget.productRepo.getProducts();
+      final products = await widget.productRepo.getProducts().timeout(
+            const Duration(seconds: 10),
+            onTimeout: () => throw Exception('Timeout loading products'),
+          );
       if (mounted) {
         setState(() {
           _products = products;
           _loadingProducts = false;
+          _productsError = false;
         });
       }
-    } catch (_) {
-      if (mounted) setState(() => _loadingProducts = false);
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _loadingProducts = false;
+          _productsError = true;
+        });
+        print('Failed to load products: $e');
+      }
     }
   }
 
@@ -657,237 +669,241 @@ class _CreateLinkSheetState extends State<_CreateLinkSheet> {
           24, 12, 24, MediaQuery.of(context).viewInsets.bottom + 32),
       child: Form(
         key: _formKey,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: AppColors.divider,
-                    borderRadius: BorderRadius.circular(2),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.8,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: AppColors.divider,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'Create Payment Link',
-                style: Theme.of(context)
-                    .textTheme
-                    .titleLarge
-                    ?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                'Link to a product or set a custom amount',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-              ),
-              const SizedBox(height: 20),
+                const SizedBox(height: 20),
+                Text(
+                  'Create Payment Link',
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleLarge
+                      ?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Link to a product or set a custom amount',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                ),
+                const SizedBox(height: 20),
 
-              // ── Product picker ──────────────────────────────────────
-              const _SectionLabel(label: 'Product (optional)'),
-              const SizedBox(height: 8),
-              _loadingProducts
-                  ? const Center(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8),
-                        child: SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                // ── Product picker ──────────────────────────────────────
+                const _SectionLabel(label: 'Product (optional)'),
+                const SizedBox(height: 8),
+                _loadingProducts
+                    ? const Center(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8),
+                          child: SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
                         ),
-                      ),
-                    )
-                  : DropdownButtonFormField<Product?>(
-                      initialValue: _selectedProduct,
-                      decoration: const InputDecoration(
-                        hintText: 'None — custom amount',
-                      ),
-                      items: [
-                        const DropdownMenuItem<Product?>(
-                          value: null,
-                          child: Text('None — custom amount',
-                              style: TextStyle(color: AppColors.textSecondary)),
-                        ),
-                        ..._products.map(
-                          (p) => DropdownMenuItem<Product?>(
-                            value: p,
+                      )
+                    : _productsError
+                        ? Container(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
                             child: Row(
                               children: [
-                                Expanded(
-                                  child: Text(p.name,
-                                      overflow: TextOverflow.ellipsis),
-                                ),
+                                Icon(Icons.error_outline,
+                                    size: 16, color: AppColors.error),
                                 const SizedBox(width: 8),
-                                Text(
-                                  '${p.currency} ${p.price.toStringAsFixed(2)}',
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: AppColors.textSecondary,
+                                Expanded(
+                                  child: Text(
+                                    'Failed to load products',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: AppColors.error,
+                                    ),
                                   ),
+                                ),
+                                TextButton(
+                                  onPressed: _loadProducts,
+                                  child: const Text('Retry',
+                                      style: TextStyle(fontSize: 12)),
                                 ),
                               ],
                             ),
+                          )
+                        : ProductSearchDropdown(
+                            products: _products,
+                            selectedProduct: _selectedProduct,
+                            onSelected: _onProductSelected,
+                            hintText: 'Search products...',
                           ),
-                        ),
-                      ],
-                      onChanged: _onProductSelected,
-                    ),
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-              // ── Amount + Currency ───────────────────────────────────
-              const _SectionLabel(label: 'Amount'),
-              const SizedBox(height: 8),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: TextFormField(
-                      controller: _amountController,
-                      decoration: const InputDecoration(hintText: '0.00'),
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
-                      validator: (v) {
-                        if (v == null || v.trim().isEmpty) return 'Required';
-                        if (double.tryParse(v.trim()) == null) return 'Invalid';
-                        if (double.parse(v.trim()) <= 0) return 'Must be > 0';
-                        return null;
-                      },
+                // ── Amount + Currency ───────────────────────────────────
+                const _SectionLabel(label: 'Amount'),
+                const SizedBox(height: 8),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: TextFormField(
+                        controller: _amountController,
+                        decoration: const InputDecoration(hintText: '0.00'),
+                        keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true),
+                        validator: (v) {
+                          if (v == null || v.trim().isEmpty) return 'Required';
+                          if (double.tryParse(v.trim()) == null)
+                            return 'Invalid';
+                          if (double.parse(v.trim()) <= 0) return 'Must be > 0';
+                          return null;
+                        },
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    flex: 2,
-                    child: DropdownButtonFormField<String>(
-                      initialValue: _currency,
-                      decoration: const InputDecoration(labelText: 'Currency'),
-                      items: _currencies
-                          .map(
-                              (c) => DropdownMenuItem(value: c, child: Text(c)))
-                          .toList(),
-                      onChanged: (v) => setState(() => _currency = v ?? 'USD'),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      flex: 2,
+                      child: DropdownButtonFormField<String>(
+                        initialValue: _currency,
+                        decoration:
+                            const InputDecoration(labelText: 'Currency'),
+                        items: _currencies
+                            .map((c) =>
+                                DropdownMenuItem(value: c, child: Text(c)))
+                            .toList(),
+                        onChanged: (v) =>
+                            setState(() => _currency = v ?? 'USD'),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // ── Link type ───────────────────────────────────────────
-              const _SectionLabel(label: 'Link type'),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  ChoiceChip(
-                    label: const Text('Public'),
-                    selected: _isPublic,
-                    onSelected: (_) => setState(() => _isPublic = true),
-                    selectedColor: AppColors.success.withValues(alpha: 0.15),
-                    labelStyle: TextStyle(
-                      color: _isPublic
-                          ? AppColors.success
-                          : AppColors.textSecondary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  ChoiceChip(
-                    label: const Text('Private'),
-                    selected: !_isPublic,
-                    onSelected: (_) => setState(() => _isPublic = false),
-                    selectedColor: AppColors.accent.withValues(alpha: 0.15),
-                    labelStyle: TextStyle(
-                      color: !_isPublic
-                          ? AppColors.accent
-                          : AppColors.textSecondary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Text(
-                _isPublic
-                    ? 'Anyone with the link can pay'
-                    : 'Only shared with specific customers',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-              ),
-              const SizedBox(height: 12),
-
-              // ── Reusable toggle ─────────────────────────────────────
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Reusable link'),
-                subtitle: Text(
-                  _isReusable
-                      ? 'Can be paid multiple times'
-                      : 'Single use — deactivates after first payment',
-                  style: const TextStyle(
-                      fontSize: 12, color: AppColors.textSecondary),
+                  ],
                 ),
-                value: _isReusable,
-                activeThumbColor: AppColors.primary,
-                onChanged: (v) => setState(() => _isReusable = v),
-              ),
+                const SizedBox(height: 16),
 
-              // ── Expiry toggle ───────────────────────────────────────
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Set expiry date'),
-                subtitle: _hasExpiry
-                    ? Text(
-                        'Expires ${_expiryDate.day}/${_expiryDate.month}/${_expiryDate.year}',
-                        style: const TextStyle(
-                            color: AppColors.textSecondary, fontSize: 12),
-                      )
-                    : null,
-                value: _hasExpiry,
-                activeThumbColor: AppColors.primary,
-                onChanged: (v) async {
-                  if (v) {
-                    final picked = await showDatePicker(
-                      context: context,
-                      initialDate: _expiryDate,
-                      firstDate: DateTime.now().add(const Duration(days: 1)),
-                      lastDate: DateTime.now().add(const Duration(days: 365)),
-                    );
-                    if (picked != null && mounted) {
-                      setState(() {
-                        _hasExpiry = true;
-                        _expiryDate = picked;
-                      });
-                    }
-                  } else {
-                    setState(() => _hasExpiry = false);
-                  }
-                },
-              ),
+                // ── Link type ───────────────────────────────────────────
+                const _SectionLabel(label: 'Link type'),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    ChoiceChip(
+                      label: const Text('Public'),
+                      selected: _isPublic,
+                      onSelected: (_) => setState(() => _isPublic = true),
+                      selectedColor: AppColors.success.withValues(alpha: 0.15),
+                      labelStyle: TextStyle(
+                        color: _isPublic
+                            ? AppColors.success
+                            : AppColors.textSecondary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    ChoiceChip(
+                      label: const Text('Private'),
+                      selected: !_isPublic,
+                      onSelected: (_) => setState(() => _isPublic = false),
+                      selectedColor: AppColors.accent.withValues(alpha: 0.15),
+                      labelStyle: TextStyle(
+                        color: !_isPublic
+                            ? AppColors.accent
+                            : AppColors.textSecondary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _isPublic
+                      ? 'Anyone with the link can pay'
+                      : 'Only shared with specific customers',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                ),
+                const SizedBox(height: 12),
 
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _isCreating ? null : _create,
-                  style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14)),
-                  child: _isCreating
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                              strokeWidth: 2, color: Colors.white),
+                // ── Reusable toggle ─────────────────────────────────────
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Reusable link'),
+                  subtitle: Text(
+                    _isReusable
+                        ? 'Can be paid multiple times'
+                        : 'Single use — deactivates after first payment',
+                    style: const TextStyle(
+                        fontSize: 12, color: AppColors.textSecondary),
+                  ),
+                  value: _isReusable,
+                  activeThumbColor: AppColors.primary,
+                  onChanged: (v) => setState(() => _isReusable = v),
+                ),
+
+                // ── Expiry toggle ───────────────────────────────────────
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Set expiry date'),
+                  subtitle: _hasExpiry
+                      ? Text(
+                          'Expires ${_expiryDate.day}/${_expiryDate.month}/${_expiryDate.year}',
+                          style: const TextStyle(
+                              color: AppColors.textSecondary, fontSize: 12),
                         )
-                      : const Text('Generate Link'),
+                      : null,
+                  value: _hasExpiry,
+                  activeThumbColor: AppColors.primary,
+                  onChanged: (v) async {
+                    if (v) {
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: _expiryDate,
+                        firstDate: DateTime.now().add(const Duration(days: 1)),
+                        lastDate: DateTime.now().add(const Duration(days: 365)),
+                      );
+                      if (picked != null && mounted) {
+                        setState(() {
+                          _hasExpiry = true;
+                          _expiryDate = picked;
+                        });
+                      }
+                    } else {
+                      setState(() => _hasExpiry = false);
+                    }
+                  },
                 ),
-              ),
-            ],
+
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _isCreating ? null : _create,
+                    style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14)),
+                    child: _isCreating
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2, color: Colors.white),
+                          )
+                        : const Text('Generate Link'),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
