@@ -18,36 +18,40 @@ class ErrorHandler {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
-        return const TimeoutException('Request timed out. Please check your connection and try again.');
-      
+        return const TimeoutException(
+            'Request timed out. Please check your connection and try again.');
+
       case DioExceptionType.connectionError:
-        return const NetworkException('No internet connection. Please check your network settings.');
-      
+        return const NetworkException(
+            'No internet connection. Please check your network settings.');
+
       case DioExceptionType.badResponse:
         return _handleHttpError(error);
-      
+
       case DioExceptionType.cancel:
         return const UnexpectedResponseException('Request was cancelled.');
-      
+
       case DioExceptionType.unknown:
-        return const UnexpectedResponseException('An unexpected error occurred. Please try again.');
-      
+        return const UnexpectedResponseException(
+            'An unexpected error occurred. Please try again.');
+
       default:
-        return UnexpectedResponseException(error.message ?? 'Unknown error occurred.');
+        return UnexpectedResponseException(
+            error.message ?? 'Unknown error occurred.');
     }
   }
 
   static ApiException _handleHttpError(DioException error) {
     final statusCode = error.response?.statusCode;
     final responseData = error.response?.data;
-    
+
     String message = 'Something went wrong';
     Map<String, String>? fieldErrors;
 
     // Extract error message from response data
     if (responseData is Map<String, dynamic>) {
       message = responseData['error'] ?? responseData['message'] ?? message;
-      
+
       // Handle validation errors with field-specific messages
       if (responseData.containsKey('errors') && responseData['errors'] is Map) {
         fieldErrors = Map<String, String>.from(
@@ -64,19 +68,24 @@ class ErrorHandler {
       case 401:
         return AuthException(message);
       case 403:
-        return ClientException('Access forbidden. You don\'t have permission to perform this action.');
+        return const ClientException(
+            'Access forbidden. You don\'t have permission to perform this action.');
       case 404:
-        return ClientException('The requested resource was not found.');
+        return const ClientException('The requested resource was not found.');
       case 422:
         return ValidationException(message, fieldErrors);
       case 429:
-        return ClientException('Too many requests. Please try again later.');
+        return const ClientException(
+            'Too many requests. Please try again later.');
       case 500:
-        return ServerException('Internal server error. Please try again later.');
+        return const ServerException(
+            'Internal server error. Please try again later.');
       case 502:
-        return ServerException('Server is temporarily unavailable. Please try again later.');
+        return const ServerException(
+            'Server is temporarily unavailable. Please try again later.');
       case 503:
-        return ServerException('Service unavailable. Please try again later.');
+        return const ServerException(
+            'Service unavailable. Please try again later.');
       default:
         return UnexpectedResponseException(message, statusCode);
     }
@@ -95,7 +104,8 @@ class ErrorHandler {
         return '🔐 Authentication failed. Please check your credentials.';
       case ValidationException:
         final validationException = exception as ValidationException;
-        if (validationException.fieldErrors != null && validationException.fieldErrors!.isNotEmpty) {
+        if (validationException.fieldErrors != null &&
+            validationException.fieldErrors!.isNotEmpty) {
           return '⚠️ ${validationException.fieldErrors!.values.first}';
         }
         return '⚠️ ${exception.message}';

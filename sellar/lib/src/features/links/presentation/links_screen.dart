@@ -724,10 +724,10 @@ class _CreateLinkSheetState extends State<_CreateLinkSheet> {
                             padding: const EdgeInsets.symmetric(vertical: 8),
                             child: Row(
                               children: [
-                                Icon(Icons.error_outline,
+                                const Icon(Icons.error_outline,
                                     size: 16, color: AppColors.error),
                                 const SizedBox(width: 8),
-                                Expanded(
+                                const Expanded(
                                   child: Text(
                                     'Failed to load products',
                                     style: TextStyle(
@@ -767,8 +767,9 @@ class _CreateLinkSheetState extends State<_CreateLinkSheet> {
                             decimal: true),
                         validator: (v) {
                           if (v == null || v.trim().isEmpty) return 'Required';
-                          if (double.tryParse(v.trim()) == null)
+                          if (double.tryParse(v.trim()) == null) {
                             return 'Invalid';
+                          }
                           if (double.parse(v.trim()) <= 0) return 'Must be > 0';
                           return null;
                         },

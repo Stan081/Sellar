@@ -42,3 +42,28 @@ android {
 flutter {
     source = "../.."
 }
+
+dependencies {
+    constraints {
+        implementation("androidx.activity:activity-ktx") {
+            version {
+                strictly "[1.9, 1.10)"
+            }
+        }
+        implementation("androidx.activity:activity") {
+            version {
+                strictly "[1.9, 1.10)"
+            }
+        }
+        implementation("androidx.core:core-ktx") {
+            version {
+                strictly "[1.13, 1.14)"
+            }
+        }
+        implementation("androidx.core:core") {
+            version {
+                strictly "[1.13, 1.14)"
+            }
+        }
+    }
+}

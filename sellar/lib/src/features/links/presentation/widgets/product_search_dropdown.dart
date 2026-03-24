@@ -84,20 +84,20 @@ class _ProductSearchDropdownState extends State<ProductSearchDropdown> {
           focusNode: _focusNode,
           decoration: InputDecoration(
             hintText: widget.hintText,
-            hintStyle: TextStyle(color: AppColors.textHint),
+            hintStyle: const TextStyle(color: AppColors.textHint),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: AppColors.divider),
+              borderSide: const BorderSide(color: AppColors.divider),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: AppColors.primary, width: 2),
+              borderSide: const BorderSide(color: AppColors.primary, width: 2),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 12,
               vertical: 12,
             ),
-            prefixIcon: Icon(
+            prefixIcon: const Icon(
               Icons.search,
               color: AppColors.textSecondary,
               size: 20,
@@ -123,7 +123,7 @@ class _ProductSearchDropdownState extends State<ProductSearchDropdown> {
             child: Column(
               children: [
                 Container(
-                  constraints: BoxConstraints(
+                  constraints: const BoxConstraints(
                     maxHeight: 200,
                   ),
                   child: ListView.builder(
@@ -198,7 +198,7 @@ class _SelectedProductCard extends StatelessWidget {
                         height: 50,
                         errorBuilder: (context, error, stackTrace) => Container(
                           color: AppColors.background,
-                          child: Icon(
+                          child: const Icon(
                             Icons.broken_image_outlined,
                             color: AppColors.textHint,
                             size: 24,
@@ -208,7 +208,7 @@ class _SelectedProductCard extends StatelessWidget {
                           if (loadingProgress == null) return child;
                           return Container(
                             color: AppColors.background,
-                            child: Icon(
+                            child: const Icon(
                               Icons.image_outlined,
                               color: AppColors.textHint,
                               size: 24,
@@ -217,7 +217,7 @@ class _SelectedProductCard extends StatelessWidget {
                         },
                       ),
                     )
-                  : Icon(
+                  : const Icon(
                       Icons.image_outlined,
                       color: AppColors.textHint,
                       size: 24,
@@ -243,7 +243,7 @@ class _SelectedProductCard extends StatelessWidget {
                     children: [
                       Text(
                         '${product.currency} ${product.price.toStringAsFixed(2)}',
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: AppColors.primary,
                           fontWeight: FontWeight.w600,
                           fontSize: 14,
@@ -259,7 +259,7 @@ class _SelectedProductCard extends StatelessWidget {
                         ),
                         child: Text(
                           product.category,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 11,
                             color: AppColors.primary,
                             fontWeight: FontWeight.w600,
@@ -280,7 +280,7 @@ class _SelectedProductCard extends StatelessWidget {
                   color: AppColors.error.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(6),
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.close,
                   color: AppColors.error,
                   size: 16,
@@ -334,7 +334,7 @@ class _ProductTile extends StatelessWidget {
                             errorBuilder: (context, error, stackTrace) =>
                                 Container(
                               color: AppColors.background,
-                              child: Icon(
+                              child: const Icon(
                                 Icons.broken_image_outlined,
                                 color: AppColors.textHint,
                                 size: 20,
@@ -344,7 +344,7 @@ class _ProductTile extends StatelessWidget {
                               if (loadingProgress == null) return child;
                               return Container(
                                 color: AppColors.background,
-                                child: Icon(
+                                child: const Icon(
                                   Icons.image_outlined,
                                   color: AppColors.textHint,
                                   size: 20,
@@ -353,7 +353,7 @@ class _ProductTile extends StatelessWidget {
                             },
                           ),
                         )
-                      : Icon(
+                      : const Icon(
                           Icons.image_outlined,
                           color: AppColors.textHint,
                           size: 20,
@@ -377,7 +377,7 @@ class _ProductTile extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(
                         '${product.currency} ${product.price.toStringAsFixed(2)}',
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: AppColors.primary,
                           fontWeight: FontWeight.w500,
                           fontSize: 12,
@@ -396,7 +396,7 @@ class _ProductTile extends StatelessWidget {
                   ),
                   child: Text(
                     product.category,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 10,
                       color: AppColors.primary,
                       fontWeight: FontWeight.w600,
@@ -408,7 +408,7 @@ class _ProductTile extends StatelessWidget {
           ),
         ),
         if (showDivider)
-          Divider(height: 1, color: AppColors.divider, indent: 64),
+          const Divider(height: 1, color: AppColors.divider, indent: 64),
       ],
     );
   }
