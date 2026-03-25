@@ -26,6 +26,10 @@ class _ProductsScreenState extends State<ProductsScreen>
   bool _isLoading = true;
   String? _error;
   String _businessName = 'My Business';
+  String _searchQuery = '';
+  String? _selectedCategory;
+  bool _isSearching = false;
+  final _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -47,9 +51,33 @@ class _ProductsScreenState extends State<ProductsScreen>
     } catch (_) {}
   }
 
+  List<Product> get _filteredProducts {
+    var filtered = _products;
+    if (_searchQuery.isNotEmpty) {
+      final q = _searchQuery.toLowerCase();
+      filtered = filtered
+          .where((p) =>
+              p.name.toLowerCase().contains(q) ||
+              p.description.toLowerCase().contains(q) ||
+              p.category.toLowerCase().contains(q) ||
+              p.tags.any((t) => t.toLowerCase().contains(q)))
+          .toList();
+    }
+    if (_selectedCategory != null) {
+      filtered =
+          filtered.where((p) => p.category == _selectedCategory).toList();
+    }
+    return filtered;
+  }
+
+  List<String> get _categories {
+    return _products.map((p) => p.category).toSet().toList()..sort();
+  }
+
   @override
   void dispose() {
     _tabController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -88,8 +116,9 @@ class _ProductsScreenState extends State<ProductsScreen>
 
   @override
   Widget build(BuildContext context) {
-    final pendingProducts = _products.where((p) => p.isPending).toList();
-    final soldProducts = _products.where((p) => p.isSold).toList();
+    final filtered = _filteredProducts;
+    final pendingProducts = filtered.where((p) => p.isPending).toList();
+    final soldProducts = filtered.where((p) => p.isSold).toList();
 
     if (_isLoading) {
       return const Scaffold(
@@ -132,19 +161,40 @@ class _ProductsScreenState extends State<ProductsScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: _buildAppBarTitle(context),
+        title: _isSearching
+            ? TextField(
+                controller: _searchController,
+                autofocus: true,
+                decoration: const InputDecoration(
+                  hintText: 'Search products...',
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  filled: false,
+                  contentPadding: EdgeInsets.symmetric(vertical: 12),
+                ),
+                onChanged: (v) => setState(() => _searchQuery = v),
+              )
+            : _buildAppBarTitle(context),
         actions: [
           IconButton(
-            icon: const Icon(Icons.search),
+            icon: Icon(_isSearching ? Icons.close : Icons.search),
             onPressed: () {
-              // TODO: Implement search
+              setState(() {
+                _isSearching = !_isSearching;
+                if (!_isSearching) {
+                  _searchQuery = '';
+                  _searchController.clear();
+                }
+              });
             },
           ),
           IconButton(
-            icon: const Icon(Icons.filter_list),
-            onPressed: () {
-              // TODO: Implement filter
-            },
+            icon: Icon(
+              Icons.filter_list,
+              color: _selectedCategory != null ? AppColors.primary : null,
+            ),
+            onPressed: _showFilterSheet,
           ),
           Padding(
             padding: const EdgeInsets.only(right: 8),
@@ -209,6 +259,82 @@ class _ProductsScreenState extends State<ProductsScreen>
         icon: const Icon(Icons.add),
         label: const Text('Add Product'),
       ),
+    );
+  }
+
+  void _showFilterSheet() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        final categories = _categories;
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+                child: Row(
+                  children: [
+                    Text(
+                      'Filter by Category',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                    ),
+                    const Spacer(),
+                    if (_selectedCategory != null)
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          setState(() => _selectedCategory = null);
+                        },
+                        child: const Text('Clear'),
+                      ),
+                    IconButton(
+                      icon: const Icon(Icons.close, size: 20),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(height: 1),
+              if (categories.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.all(24),
+                  child: Text('No categories available'),
+                )
+              else
+                ...categories.map((cat) => ListTile(
+                      leading: Icon(
+                        Icons.category_outlined,
+                        color: _selectedCategory == cat
+                            ? AppColors.primary
+                            : AppColors.textSecondary,
+                      ),
+                      title: Text(cat,
+                          style: TextStyle(
+                            fontWeight: _selectedCategory == cat
+                                ? FontWeight.w700
+                                : FontWeight.w500,
+                          )),
+                      trailing: _selectedCategory == cat
+                          ? const Icon(Icons.check_circle,
+                              color: AppColors.primary, size: 22)
+                          : null,
+                      onTap: () {
+                        Navigator.pop(context);
+                        setState(() => _selectedCategory =
+                            _selectedCategory == cat ? null : cat);
+                      },
+                    )),
+              const SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
     );
   }
 

@@ -108,6 +108,36 @@ class AuthRepository {
     throw Exception(response.data?['error'] ?? 'Failed to fetch profile');
   }
 
+  /// Update vendor profile
+  Future<Vendor> updateProfile({
+    String? businessName,
+    String? firstName,
+    String? lastName,
+    String? phone,
+    String? country,
+    String? currency,
+  }) async {
+    final data = <String, dynamic>{};
+    if (businessName != null) data['businessName'] = businessName;
+    if (firstName != null) data['firstName'] = firstName;
+    if (lastName != null) data['lastName'] = lastName;
+    if (phone != null) data['phone'] = phone;
+    if (country != null) data['country'] = country;
+    if (currency != null) data['currency'] = currency;
+
+    final response = await _apiService.put(
+      AppConstants.authProfilePath,
+      data: data,
+    );
+
+    if (response.statusCode == 200 && response.data != null) {
+      final responseData = response.data['data'] as Map<String, dynamic>;
+      return Vendor.fromJson(responseData);
+    }
+
+    throw Exception(response.data?['error'] ?? 'Failed to update profile');
+  }
+
   /// Logout current user
   Future<void> logout() async {
     await _storageService.clearUserData();

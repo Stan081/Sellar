@@ -676,7 +676,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
     required void Function(String?) onChanged,
   }) {
     return DropdownButtonFormField<String>(
-      initialValue: value,
+      value: value,
       decoration: InputDecoration(labelText: label),
       items: items
           .map((item) => DropdownMenuItem(value: item, child: Text(item)))

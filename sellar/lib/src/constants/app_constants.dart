@@ -10,6 +10,7 @@ class AppConstants {
   static const String authProfilePath = '/api/auth/profile';
   static const String productsPath = '/api/products';
   static const String linksPath = '/api/links';
+  static const String customersPath = '/api/customers';
   static const String uploadImagePath = '/api/upload/image';
 
   // Timeouts

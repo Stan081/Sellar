@@ -47,7 +47,7 @@ class Product {
       name: json['name'] as String,
       description: json['description'] as String? ?? '',
       price: (json['price'] as num).toDouble(),
-      currency: 'USD',
+      currency: json['currency'] as String? ?? 'USD',
       images: resolvedImages,
       category: json['category'] as String,
       quantity: json['quantity'] as int?,

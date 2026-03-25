@@ -1,18 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:sellar/src/features/links/data/link_repository.dart';
 import 'package:sellar/src/features/products/domain/entities/product.dart';
+import 'package:sellar/src/features/products/presentation/edit_product_screen.dart';
 import 'package:sellar/src/features/products/presentation/widgets/post_to_social_sheet.dart';
+import 'package:sellar/src/services/app_services.dart';
 import 'package:sellar/src/theme/app_colors.dart';
 import 'package:share_plus/share_plus.dart';
 
 /// Product details screen with link generation
-class ProductDetailsScreen extends StatelessWidget {
+class ProductDetailsScreen extends StatefulWidget {
   const ProductDetailsScreen({
     super.key,
     required this.product,
   });
 
   final Product product;
+
+  @override
+  State<ProductDetailsScreen> createState() => _ProductDetailsScreenState();
+}
+
+class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
+  late Product product;
+
+  @override
+  void initState() {
+    super.initState();
+    product = widget.product;
+  }
 
   void _showSharePreviewSheet(BuildContext context) {
     showModalBottomSheet(
@@ -232,7 +248,7 @@ class ProductDetailsScreen extends StatelessWidget {
           Row(
             children: [
               Text(
-                '\$${product.price.toStringAsFixed(2)}',
+                '${_currencySymbol(product.currency)}${product.price.toStringAsFixed(2)}',
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: AppColors.primary,
@@ -421,10 +437,16 @@ class ProductDetailsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           OutlinedButton.icon(
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Edit product coming soon')),
+            onPressed: () async {
+              final updated = await Navigator.push<Product>(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => EditProductScreen(product: product),
+                ),
               );
+              if (updated != null && mounted) {
+                setState(() => product = updated);
+              }
             },
             icon: const Icon(Icons.edit),
             label: const Text('Edit'),
@@ -432,6 +454,19 @@ class ProductDetailsScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _currencySymbol(String currency) {
+    const symbols = {
+      'USD': '\$',
+      'EUR': '€',
+      'GBP': '£',
+      'NGN': '₦',
+      'GHS': 'GH₵',
+      'KES': 'KSh',
+      'ZAR': 'R',
+    };
+    return symbols[currency] ?? '\$';
   }
 
   void _showGenerateLinkBottomSheet(BuildContext context) {
@@ -462,6 +497,7 @@ class GenerateLinkBottomSheet extends StatefulWidget {
 
 class _GenerateLinkBottomSheetState extends State<GenerateLinkBottomSheet> {
   bool isPrivate = false;
+  bool _isGenerating = false;
   final _formKey = GlobalKey<FormState>();
   final _contactController = TextEditingController();
   String _contactType = 'email'; // email or phone
@@ -521,9 +557,16 @@ class _GenerateLinkBottomSheetState extends State<GenerateLinkBottomSheet> {
               _buildInfoCard(),
               const SizedBox(height: 24),
               ElevatedButton.icon(
-                onPressed: _generateLink,
-                icon: const Icon(Icons.link),
-                label: const Text('Generate Link'),
+                onPressed: _isGenerating ? null : _generateLink,
+                icon: _isGenerating
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: Colors.white),
+                      )
+                    : const Icon(Icons.link),
+                label: Text(_isGenerating ? 'Generating...' : 'Generate Link'),
               ),
               const SizedBox(height: 12),
               TextButton(
@@ -718,25 +761,45 @@ class _GenerateLinkBottomSheetState extends State<GenerateLinkBottomSheet> {
     );
   }
 
-  void _generateLink() {
+  Future<void> _generateLink() async {
     if (isPrivate && !_formKey.currentState!.validate()) {
       return;
     }
 
-    // TODO: Generate actual payment link
-    final linkUrl = 'https://sellar.app/pay/${widget.product.id}';
+    setState(() => _isGenerating = true);
 
-    Navigator.pop(context);
+    try {
+      final linkRepo = LinkRepository(apiService: AppServices.api);
+      final link = await linkRepo.createLink(
+        productId: widget.product.id,
+        amount: widget.product.price,
+        currency: widget.product.currency,
+        isPublic: !isPrivate,
+      );
 
-    showDialog(
-      context: context,
-      builder: (context) => _LinkGeneratedDialog(
-        linkUrl: linkUrl,
-        product: widget.product,
-        isPrivate: isPrivate,
-        contact: isPrivate ? _contactController.text : null,
-      ),
-    );
+      if (!mounted) return;
+      Navigator.pop(context);
+
+      showDialog(
+        context: context,
+        builder: (context) => _LinkGeneratedDialog(
+          linkUrl: link.url,
+          product: widget.product,
+          isPrivate: isPrivate,
+          contact: isPrivate ? _contactController.text : null,
+        ),
+      );
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isGenerating = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to generate link: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
   }
 }
 

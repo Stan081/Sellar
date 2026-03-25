@@ -603,7 +603,7 @@ class _CreateLinkSheetState extends State<_CreateLinkSheet> {
           _loadingProducts = false;
           _productsError = true;
         });
-        print('Failed to load products: $e');
+        debugPrint('Failed to load products: $e');
       }
     }
   }
@@ -779,7 +779,7 @@ class _CreateLinkSheetState extends State<_CreateLinkSheet> {
                     Expanded(
                       flex: 2,
                       child: DropdownButtonFormField<String>(
-                        initialValue: _currency,
+                        value: _currency,
                         decoration:
                             const InputDecoration(labelText: 'Currency'),
                         items: _currencies
