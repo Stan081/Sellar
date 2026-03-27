@@ -4,6 +4,7 @@ import 'package:sellar/src/features/customers/domain/entities/customer.dart';
 import 'package:sellar/src/features/customers/presentation/customer_detail_screen.dart';
 import 'package:sellar/src/services/app_services.dart';
 import 'package:sellar/src/theme/app_colors.dart';
+import 'package:sellar/src/theme/app_spacing.dart';
 
 /// Customers screen — view and manage all customers
 class CustomersScreen extends StatefulWidget {
@@ -86,8 +87,8 @@ class _CustomersScreenState extends State<CustomersScreen> {
         filtered.sort((a, b) => b.purchaseCount.compareTo(a.purchaseCount));
         break;
       case _SortOption.alphabetical:
-        filtered.sort(
-            (a, b) => a.displayName.toLowerCase().compareTo(b.displayName.toLowerCase()));
+        filtered.sort((a, b) =>
+            a.displayName.toLowerCase().compareTo(b.displayName.toLowerCase()));
         break;
     }
 
@@ -105,7 +106,8 @@ class _CustomersScreenState extends State<CustomersScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+              padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.md),
               child: Row(
                 children: [
                   Text(
@@ -166,7 +168,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
         appBar: AppBar(title: const Text('Customers')),
         body: Center(
           child: Padding(
-            padding: const EdgeInsets.all(32),
+            padding: const EdgeInsets.all(AppSpacing.lg),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -240,7 +242,8 @@ class _CustomersScreenState extends State<CustomersScreen> {
               : RefreshIndicator(
                   onRefresh: _loadCustomers,
                   child: ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+                    padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.md, AppSpacing.lg, AppSpacing.md, 100),
                     itemCount: filtered.length + 1, // +1 for summary header
                     itemBuilder: (context, index) {
                       if (index == 0) return _buildSummaryHeader();
@@ -256,10 +259,10 @@ class _CustomersScreenState extends State<CustomersScreen> {
 
   Widget _buildSummaryHeader() {
     final totalCustomers = _customers.length;
-    final totalRevenue = _customers.fold<double>(
-        0, (sum, c) => sum + c.totalSpent);
-    final totalPurchases = _customers.fold<int>(
-        0, (sum, c) => sum + c.purchaseCount);
+    final totalRevenue =
+        _customers.fold<double>(0, (sum, c) => sum + c.totalSpent);
+    final totalPurchases =
+        _customers.fold<int>(0, (sum, c) => sum + c.purchaseCount);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -310,7 +313,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
             Text(
               label,
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 18,
                 fontWeight: FontWeight.w800,
                 color: color,
               ),
@@ -319,7 +322,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
             Text(
               subtitle,
               style: const TextStyle(
-                fontSize: 11,
+                fontSize: 13,
                 color: AppColors.textSecondary,
                 fontWeight: FontWeight.w500,
               ),
@@ -339,7 +342,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
             height: MediaQuery.of(context).size.height * 0.65,
             child: Center(
               child: Padding(
-                padding: const EdgeInsets.all(32),
+                padding: const EdgeInsets.all(AppSpacing.lg),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -473,7 +476,7 @@ class _CustomerCard extends StatelessWidget {
                   children: [
                     Text(
                       customer.displayName,
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w600,
                           ),
                       maxLines: 1,
@@ -482,7 +485,7 @@ class _CustomerCard extends StatelessWidget {
                     const SizedBox(height: 3),
                     Text(
                       customer.identifier,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: AppColors.textSecondary,
                           ),
                       maxLines: 1,
@@ -518,7 +521,7 @@ class _CustomerCard extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 12, color: AppColors.textHint),
+        Icon(icon, size: 15, color: AppColors.textHint),
         const SizedBox(width: 3),
         Text(
           label,

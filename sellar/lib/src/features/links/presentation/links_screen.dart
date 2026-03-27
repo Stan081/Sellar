@@ -5,6 +5,7 @@ import 'package:sellar/src/features/products/data/product_repository.dart';
 import 'package:sellar/src/features/products/domain/entities/product.dart';
 import 'package:sellar/src/services/app_services.dart';
 import 'package:sellar/src/theme/app_colors.dart';
+import 'package:sellar/src/theme/app_spacing.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:sellar/src/features/links/presentation/widgets/product_search_dropdown.dart';
 
@@ -102,7 +103,7 @@ class _LinksScreenState extends State<LinksScreen>
       return Scaffold(
         body: Center(
           child: Padding(
-            padding: const EdgeInsets.all(32),
+            padding: const EdgeInsets.all(AppSpacing.sm),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -169,7 +170,8 @@ class _LinksScreenState extends State<LinksScreen>
     return RefreshIndicator(
       onRefresh: _loadLinks,
       child: ListView.separated(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+        padding: const EdgeInsets.fromLTRB(
+            AppSpacing.sm, AppSpacing.lg, AppSpacing.sm, 100),
         itemCount: links.length,
         separatorBuilder: (_, __) => const SizedBox(height: 12),
         itemBuilder: (context, index) => _LinkCard(
@@ -189,7 +191,7 @@ class _LinksScreenState extends State<LinksScreen>
             height: MediaQuery.of(context).size.height * 0.6,
             child: Center(
               child: Padding(
-                padding: const EdgeInsets.all(32),
+                padding: const EdgeInsets.all(AppSpacing.sm),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -256,7 +258,7 @@ class _LinkCard extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.md),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

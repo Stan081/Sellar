@@ -8,6 +8,7 @@ import 'package:sellar/src/features/settings/presentation/privacy_policy_screen.
 import 'package:sellar/src/features/settings/presentation/terms_of_service_screen.dart';
 import 'package:sellar/src/services/app_services.dart';
 import 'package:sellar/src/theme/app_colors.dart';
+import 'package:sellar/src/theme/app_spacing.dart';
 
 /// Settings screen
 class SettingsScreen extends StatefulWidget {
@@ -297,7 +298,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         title: const Text('Settings'),
       ),
       body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.sm, vertical: AppSpacing.sm),
         children: [
           // Profile Card
           Card(
@@ -305,7 +307,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: () => _navigateTo(const EditProfileScreen()),
               borderRadius: BorderRadius.circular(16),
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(AppSpacing.lg),
                 child: Row(
                   children: [
                     CircleAvatar(
@@ -375,7 +377,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             ),
                     ),
                     Container(
-                      padding: const EdgeInsets.all(6),
+                      padding: const EdgeInsets.all(AppSpacing.sm),
                       decoration: BoxDecoration(
                         color: AppColors.primary.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(8),

@@ -3,6 +3,7 @@ import 'package:sellar/src/core/utils/error_handler.dart';
 import 'package:sellar/src/features/auth/domain/auth_repository.dart';
 import 'package:sellar/src/services/app_services.dart';
 import 'package:sellar/src/theme/app_colors.dart';
+import 'package:sellar/src/theme/app_spacing.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -159,7 +160,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   ),
                 )
               : SingleChildScrollView(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(AppSpacing.lg),
                   child: Form(
                     key: _formKey,
                     child: Column(

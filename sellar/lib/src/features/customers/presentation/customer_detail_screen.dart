@@ -3,6 +3,7 @@ import 'package:sellar/src/features/customers/data/customer_repository.dart';
 import 'package:sellar/src/features/customers/domain/entities/customer.dart';
 import 'package:sellar/src/services/app_services.dart';
 import 'package:sellar/src/theme/app_colors.dart';
+import 'package:sellar/src/theme/app_spacing.dart';
 
 /// Customer detail screen — shows customer info, insights, and purchase history
 class CustomerDetailScreen extends StatefulWidget {
@@ -69,7 +70,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
   Widget _buildErrorState() {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: const EdgeInsets.all(AppSpacing.sm),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -103,7 +104,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
     return RefreshIndicator(
       onRefresh: _loadCustomer,
       child: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.sm),
         children: [
           _buildProfileHeader(c),
           const SizedBox(height: 20),
@@ -163,8 +164,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
   // ─── Insights Row ───────────────────────────────────────────────────────
 
   Widget _buildInsightsRow(Customer c) {
-    final avgOrder =
-        c.purchaseCount > 0 ? c.totalSpent / c.purchaseCount : 0.0;
+    final avgOrder = c.purchaseCount > 0 ? c.totalSpent / c.purchaseCount : 0.0;
     final daysSinceLastPurchase = c.lastPurchaseAt != null
         ? DateTime.now().difference(c.lastPurchaseAt!).inDays
         : null;
@@ -259,8 +259,8 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
       items.add(_ContactItem(Icons.phone_outlined, 'Phone', c.phone!));
     }
     if (c.billingAddress != null && c.billingAddress!.isNotEmpty) {
-      items.add(
-          _ContactItem(Icons.location_on_outlined, 'Billing', c.billingAddress!));
+      items.add(_ContactItem(
+          Icons.location_on_outlined, 'Billing', c.billingAddress!));
     }
 
     if (items.isEmpty) return const SizedBox.shrink();
@@ -286,8 +286,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                     color: AppColors.primary.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child:
-                      Icon(item.icon, size: 20, color: AppColors.primary),
+                  child: Icon(item.icon, size: 20, color: AppColors.primary),
                 ),
                 title: Text(
                   item.label,
@@ -356,7 +355,8 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
             ),
           )
         else
-          ...purchases.map((p) => _PurchaseTile(purchase: p, currency: currency)),
+          ...purchases
+              .map((p) => _PurchaseTile(purchase: p, currency: currency)),
       ],
     );
   }
@@ -365,8 +365,18 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
 
   String _formatDate(DateTime date) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
     ];
     return '${months[date.month - 1]} ${date.day}, ${date.year}';
   }
@@ -523,8 +533,18 @@ class _PurchaseTile extends StatelessWidget {
 
   String _formatDateTime(DateTime date) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
     ];
     final hour = date.hour > 12 ? date.hour - 12 : date.hour;
     final amPm = date.hour >= 12 ? 'PM' : 'AM';

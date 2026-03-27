@@ -5,6 +5,7 @@ import 'package:sellar/src/features/products/presentation/add_product_screen.dar
 import 'package:sellar/src/features/settings/presentation/settings_screen.dart';
 import 'package:sellar/src/services/app_services.dart';
 import 'package:sellar/src/theme/app_colors.dart';
+import 'package:sellar/src/theme/app_spacing.dart';
 import 'package:sellar/src/features/products/domain/entities/product.dart';
 import 'package:sellar/src/features/products/presentation/widgets/product_card.dart';
 
@@ -25,7 +26,7 @@ class _ProductsScreenState extends State<ProductsScreen>
   List<Product> _products = [];
   bool _isLoading = true;
   String? _error;
-  String _businessName = 'My Business';
+  String _businessName = '';
   String _searchQuery = '';
   String? _selectedCategory;
   bool _isSearching = false;
@@ -130,7 +131,7 @@ class _ProductsScreenState extends State<ProductsScreen>
       return Scaffold(
         body: Center(
           child: Padding(
-            padding: const EdgeInsets.all(32),
+            padding: const EdgeInsets.all(AppSpacing.lg),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -407,12 +408,12 @@ class _ProductsScreenState extends State<ProductsScreen>
     return RefreshIndicator(
       onRefresh: _loadProducts,
       child: GridView.builder(
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.all(AppSpacing.sm),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           childAspectRatio: 0.55,
-          crossAxisSpacing: 8,
-          mainAxisSpacing: 8,
+          crossAxisSpacing: AppSpacing.sm,
+          mainAxisSpacing: AppSpacing.sm,
         ),
         itemCount: products.length,
         itemBuilder: (context, index) {

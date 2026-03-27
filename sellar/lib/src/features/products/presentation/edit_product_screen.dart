@@ -144,7 +144,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.all(AppSpacing.sm),
+          padding: const EdgeInsets.all(AppSpacing.lg),
           children: [
             // Product Name
             _buildLabel('Product Name'),
