@@ -5,7 +5,7 @@ import 'package:sellar/src/features/links/presentation/links_screen.dart';
 import 'package:sellar/src/features/analytics/presentation/analytics_screen.dart';
 import 'package:sellar/src/features/customers/presentation/customers_screen.dart';
 import 'package:sellar/src/features/settings/presentation/settings_screen.dart';
-import 'package:sellar/src/theme/app_colors.dart';
+import 'package:sellar/src/theme/app_spacing.dart';
 
 /// Main screen with bottom navigation
 class MainScreen extends StatefulWidget {
@@ -38,10 +38,11 @@ class _MainScreenState extends State<MainScreen> {
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: theme.scaffoldBackgroundColor,
+          color: theme.colorScheme.surface,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
+              color: theme.colorScheme.shadow
+                  .withValues(alpha: isDark ? 0.3 : 0.08),
               blurRadius: 16,
               offset: const Offset(0, -4),
             ),
@@ -50,7 +51,8 @@ class _MainScreenState extends State<MainScreen> {
         child: SafeArea(
           top: false,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+            padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.sm, vertical: 6),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -107,15 +109,15 @@ class _MainScreenState extends State<MainScreen> {
             setState(() => _currentIndex = index);
           }
         },
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
           decoration: BoxDecoration(
             color: isActive
-                ? AppColors.primary.withValues(alpha: 0.1)
+                ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)
                 : Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -123,16 +125,19 @@ class _MainScreenState extends State<MainScreen> {
               Icon(
                 isActive ? activeIcon : icon,
                 size: 22,
-                color: isActive ? AppColors.primary : AppColors.textHint,
+                color: isActive
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: AppSpacing.xs),
               Text(
                 label,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                  color: isActive ? AppColors.primary : AppColors.textHint,
-                ),
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                      color: isActive
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
               ),
             ],
           ),

@@ -4,6 +4,7 @@ import 'package:sellar/src/features/products/data/product_repository.dart';
 import 'package:sellar/src/features/products/domain/entities/product.dart';
 import 'package:sellar/src/services/app_services.dart';
 import 'package:sellar/src/theme/app_colors.dart';
+import 'package:sellar/src/theme/app_spacing.dart';
 
 class EditProductScreen extends StatefulWidget {
   const EditProductScreen({super.key, required this.product});
@@ -49,8 +50,8 @@ class _EditProductScreenState extends State<EditProductScreen> {
         TextEditingController(text: widget.product.description);
     _priceController =
         TextEditingController(text: widget.product.price.toStringAsFixed(2));
-    _quantityController = TextEditingController(
-        text: widget.product.quantity?.toString() ?? '');
+    _quantityController =
+        TextEditingController(text: widget.product.quantity?.toString() ?? '');
     _tagController = TextEditingController();
     _selectedCategory = _categories.contains(widget.product.category)
         ? widget.product.category
@@ -143,7 +144,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.sm),
           children: [
             // Product Name
             _buildLabel('Product Name'),
@@ -293,7 +294,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
   Widget _buildLabel(String text) {
     return Text(
       text,
-      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.w600,
             color: AppColors.textSecondary,
           ),

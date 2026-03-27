@@ -407,12 +407,12 @@ class _ProductsScreenState extends State<ProductsScreen>
     return RefreshIndicator(
       onRefresh: _loadProducts,
       child: GridView.builder(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(8),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          childAspectRatio: 0.66,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
+          childAspectRatio: 0.55,
+          crossAxisSpacing: 8,
+          mainAxisSpacing: 8,
         ),
         itemCount: products.length,
         itemBuilder: (context, index) {
