@@ -72,6 +72,7 @@ model Product {
   category    String
   tags        String[]  // Array of tags
   price       Float
+  currency    String    @default("USD")
   quantity    Int?
   images      String[]  // Array of image URLs
   isActive    Boolean   @default(true)
@@ -137,17 +138,20 @@ model Transaction {
   @@map("transactions")
 }
 
-// Customer model (minimal data as per requirements)
+// Customer model — created when buyers purchase through payment links
 model Customer {
-  id            String   @id @default(cuid())
-  vendorId      String
-  email         String?
-  phone         String?
-  uniqueContact String   @unique // Email or phone for identification
-  totalOrders   Int      @default(0)
-  totalSpent    Float    @default(0)
-  firstSeenAt   DateTime @default(now())
-  lastSeenAt    DateTime @default(now())
+  id              String   @id @default(cuid())
+  vendorId        String
+  name            String?
+  email           String?
+  phone           String?
+  billingAddress  String?
+  currency        String   @default("USD")
+  uniqueContact   String   @unique // Email or phone for identification
+  totalOrders     Int      @default(0)
+  totalSpent      Float    @default(0)
+  createdAt       DateTime @default(now())
+  lastPurchaseAt  DateTime?
 
   // Relations
   vendor        Vendor   @relation(fields: [vendorId], references: [id], onDelete: Cascade)

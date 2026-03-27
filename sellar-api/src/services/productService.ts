@@ -19,10 +19,11 @@ export class ProductService {
     category: string;
     tags?: string[];
     price: number | string;
+    currency?: string;
     quantity?: number | string | null;
     images?: string[];
   }) {
-    const { name, description, category, tags, price, quantity, images } = body;
+    const { name, description, category, tags, price, currency, quantity, images } = body;
     if (!name || !category || price == null) {
       throw new Error('name, category, and price are required');
     }
@@ -32,6 +33,7 @@ export class ProductService {
       category,
       tags: tags ?? [],
       price: parseFloat(String(price)),
+      currency: currency ?? 'USD',
       quantity: quantity != null ? parseInt(String(quantity)) : null,
       images: images ?? [],
     });
@@ -43,6 +45,7 @@ export class ProductService {
     category?: string;
     tags?: string[];
     price?: number | string;
+    currency?: string;
     quantity?: number | string | null;
     images?: string[];
     isActive?: boolean;
@@ -50,13 +53,14 @@ export class ProductService {
     const existing = await repo.findOneByVendor(id, vendorId);
     if (!existing) throw new Error('Product not found');
 
-    const { name, description, category, tags, price, quantity, images, isActive } = body;
+    const { name, description, category, tags, price, currency, quantity, images, isActive } = body;
     return repo.update(id, {
       ...(name !== undefined && { name }),
       ...(description !== undefined && { description }),
       ...(category !== undefined && { category }),
       ...(tags !== undefined && { tags }),
       ...(price !== undefined && { price: parseFloat(String(price)) }),
+      ...(currency !== undefined && { currency }),
       ...(quantity !== undefined && { quantity: quantity != null ? parseInt(String(quantity)) : null }),
       ...(images !== undefined && { images }),
       ...(isActive !== undefined && { isActive }),

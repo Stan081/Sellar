@@ -18,6 +18,7 @@ export class ProductRepository {
     category: string;
     tags: string[];
     price: number;
+    currency?: string;
     quantity?: number | null;
     images: string[];
   }) {
@@ -30,6 +31,7 @@ export class ProductRepository {
     category?: string;
     tags?: string[];
     price?: number;
+    currency?: string;
     quantity?: number | null;
     images?: string[];
     isActive?: boolean;

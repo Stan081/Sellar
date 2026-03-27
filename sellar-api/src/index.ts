@@ -12,6 +12,7 @@ import productRoutes from './routes/products';
 import linkRoutes from './routes/links';
 import uploadRoutes from './routes/upload';
 import socialRoutes from './routes/social';
+import customerRoutes from './routes/customers';
 
 // Load environment variables
 dotenv.config();
@@ -33,10 +34,7 @@ const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs
   message: 'Too many requests from this IP, please try again later.',
-  keyGenerator: (req) => {
-    // Use the client IP from Vercel's x-forwarded-for header
-    return req.headers['x-forwarded-for'] as string || req.ip || 'unknown';
-  },
+  validate: { xForwardedForHeader: false },
   skip: (req) => {
     // Skip rate limiting for health checks
     return req.path === '/' || req.path === '/health';
@@ -72,6 +70,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/links', linkRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/social', socialRoutes);
+app.use('/api/customers', customerRoutes);
 
 // 404 handler
 app.use((req, res) => {

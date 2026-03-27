@@ -75,4 +75,38 @@ export class VendorRepository {
       data: { lastLoginAt: new Date() },
     });
   }
+
+  async updateProfile(id: string, data: {
+    businessName?: string;
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+    country?: string;
+    currency?: string;
+    avatar?: string;
+    preferredGateway?: string;
+    theme?: string;
+  }) {
+    return prisma.vendor.update({
+      where: { id },
+      data,
+      select: {
+        id: true,
+        email: true,
+        phone: true,
+        businessName: true,
+        firstName: true,
+        lastName: true,
+        country: true,
+        currency: true,
+        avatar: true,
+        isEmailVerified: true,
+        isPhoneVerified: true,
+        preferredGateway: true,
+        theme: true,
+        createdAt: true,
+        lastLoginAt: true,
+      },
+    });
+  }
 }

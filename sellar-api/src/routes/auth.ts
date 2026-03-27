@@ -5,6 +5,7 @@ import {
   sendOTP,
   verifyOTP,
   getProfile,
+  updateProfile,
   validateRegister,
   validateLogin,
   validateOTP,
@@ -22,5 +23,6 @@ router.post('/verify-otp', validateOTP, verifyOTP);
 
 // Protected routes
 router.get('/profile', authenticateToken, getProfile);
+router.put('/profile', authenticateToken, updateProfile);
 
 export default router;

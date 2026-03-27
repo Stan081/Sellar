@@ -127,3 +127,27 @@ export const getProfile = async (req: any, res: Response) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+export const updateProfile = async (req: any, res: Response) => {
+  try {
+    const allowedFields = [
+      'businessName', 'firstName', 'lastName', 'phone',
+      'country', 'currency', 'avatar', 'preferredGateway', 'theme',
+    ];
+    const data: Record<string, any> = {};
+    for (const field of allowedFields) {
+      if (req.body[field] !== undefined) {
+        data[field] = req.body[field];
+      }
+    }
+
+    if (Object.keys(data).length === 0) {
+      return res.status(400).json({ error: 'No valid fields to update' });
+    }
+
+    const vendor = await vendorRepo.updateProfile(req.vendor.id, data);
+    res.json({ message: 'Profile updated successfully', data: vendor });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
