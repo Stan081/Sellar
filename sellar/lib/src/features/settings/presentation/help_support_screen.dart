@@ -137,20 +137,23 @@ class HelpSupportScreen extends StatelessWidget {
             ),
             const _FAQItem(
               question: 'Which payment gateways are supported?',
-              answer: 'Sellar currently supports Paystack as the primary payment '
+              answer:
+                  'Sellar currently supports Paystack as the primary payment '
                   'gateway. We are actively working on adding support for Stripe, '
                   'Flutterwave, and other popular payment processors.',
             ),
             const _FAQItem(
               question: 'How do I connect my social media accounts?',
-              answer: 'Go to Settings and tap on your profile card, then select '
+              answer:
+                  'Go to Settings and tap on your profile card, then select '
                   '"Connected Accounts". From there, you can connect Facebook, '
                   'Instagram, WhatsApp, and TikTok to share products directly '
                   'to your social media channels.',
             ),
             const _FAQItem(
               question: 'Can I change my business currency?',
-              answer: 'Yes! Go to Settings and tap on "Currency" to select your '
+              answer:
+                  'Yes! Go to Settings and tap on "Currency" to select your '
                   'preferred currency. This will be used as the default currency '
                   'for new products and payment links.',
             ),
@@ -263,7 +266,7 @@ class _ContactCard extends StatelessWidget {
                   ],
                 ),
               ),
-              Icon(
+              const Icon(
                 Icons.chevron_right,
                 color: AppColors.textHint,
                 size: 20,

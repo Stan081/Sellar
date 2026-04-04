@@ -209,7 +209,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
             _buildLabel('Category'),
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
-              value: _selectedCategory,
+              initialValue: _selectedCategory,
               decoration: const InputDecoration(),
               items: _categories
                   .map((c) => DropdownMenuItem(value: c, child: Text(c)))

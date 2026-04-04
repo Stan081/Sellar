@@ -140,11 +140,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.error_outline,
+                      const Icon(Icons.error_outline,
                           size: 48, color: AppColors.textHint),
                       const SizedBox(height: 16),
                       Text(_error!,
-                          style: TextStyle(color: AppColors.textSecondary)),
+                          style:
+                              const TextStyle(color: AppColors.textSecondary)),
                       const SizedBox(height: 16),
                       TextButton(
                         onPressed: () {
@@ -271,10 +272,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         TextFormField(
                           controller: _emailController,
                           readOnly: true,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             hintText: 'Email address',
-                            prefixIcon:
-                                const Icon(Icons.email_outlined, size: 20),
+                            prefixIcon: Icon(Icons.email_outlined, size: 20),
                             filled: true,
                             fillColor: AppColors.background,
                             suffixIcon: Tooltip(

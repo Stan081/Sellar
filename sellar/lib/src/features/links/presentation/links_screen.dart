@@ -781,7 +781,7 @@ class _CreateLinkSheetState extends State<_CreateLinkSheet> {
                     Expanded(
                       flex: 2,
                       child: DropdownButtonFormField<String>(
-                        value: _currency,
+                        initialValue: _currency,
                         decoration:
                             const InputDecoration(labelText: 'Currency'),
                         items: _currencies

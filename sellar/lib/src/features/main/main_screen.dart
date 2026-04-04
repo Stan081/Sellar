@@ -4,6 +4,7 @@ import 'package:sellar/src/features/products/presentation/products_screen.dart';
 import 'package:sellar/src/features/links/presentation/links_screen.dart';
 import 'package:sellar/src/features/analytics/presentation/analytics_screen.dart';
 import 'package:sellar/src/features/customers/presentation/customers_screen.dart';
+import 'package:sellar/src/features/orders/presentation/orders_screen.dart';
 import 'package:sellar/src/features/settings/presentation/settings_screen.dart';
 import 'package:sellar/src/theme/app_spacing.dart';
 
@@ -21,6 +22,7 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> _screens = const [
     ProductsScreen(),
     LinksScreen(),
+    OrdersScreen(),
     CustomersScreen(),
     AnalyticsScreen(),
     SettingsScreen(),
@@ -70,18 +72,24 @@ class _MainScreenState extends State<MainScreen> {
                 ),
                 _buildNavItem(
                   index: 2,
+                  icon: Icons.inventory_2_outlined,
+                  activeIcon: Icons.inventory_2,
+                  label: 'Orders',
+                ),
+                _buildNavItem(
+                  index: 3,
                   icon: Icons.people_outline,
                   activeIcon: Icons.people,
                   label: 'Customers',
                 ),
                 _buildNavItem(
-                  index: 3,
+                  index: 4,
                   icon: Icons.bar_chart_outlined,
                   activeIcon: Icons.bar_chart,
                   label: 'Analytics',
                 ),
                 _buildNavItem(
-                  index: 4,
+                  index: 5,
                   icon: Icons.settings_outlined,
                   activeIcon: Icons.settings,
                   label: 'Settings',

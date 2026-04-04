@@ -166,7 +166,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.error_outline, size: 48, color: AppColors.textHint),
+          const Icon(Icons.error_outline, size: 48, color: AppColors.textHint),
           const SizedBox(height: 16),
           Text(
             'Failed to load analytics',
