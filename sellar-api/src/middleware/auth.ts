@@ -45,3 +45,6 @@ export const authenticateToken = async (
     return res.status(403).json({ error: 'Invalid or expired token' });
   }
 };
+
+// Export as authenticate for consistency with other route files
+export const authenticate = authenticateToken;

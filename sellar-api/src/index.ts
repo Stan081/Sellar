@@ -13,6 +13,8 @@ import linkRoutes from './routes/links';
 import uploadRoutes from './routes/upload';
 import socialRoutes from './routes/social';
 import customerRoutes from './routes/customers';
+import orderRoutes from './routes/orders';
+import checkoutRoutes from './routes/checkout';
 
 // Load environment variables
 dotenv.config();
@@ -71,6 +73,8 @@ app.use('/api/links', linkRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/social', socialRoutes);
 app.use('/api/customers', customerRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/checkout', checkoutRoutes);
 
 // 404 handler
 app.use((req, res) => {

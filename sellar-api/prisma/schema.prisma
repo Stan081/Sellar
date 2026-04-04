@@ -112,7 +112,7 @@ model PaymentLink {
   @@map("payment_links")
 }
 
-// Transaction model
+// Transaction model - represents orders
 model Transaction {
   id              String          @id @default(cuid())
   vendorId        String
@@ -121,10 +121,17 @@ model Transaction {
   amount          Float
   currency        String
   status          TransactionStatus @default(PENDING) // PENDING, COMPLETED, FAILED, CANCELLED
+  orderStatus     OrderStatus     @default(PENDING) // PENDING, PROCESSING, SHIPPED, DELIVERED, CANCELLED
+  deliveryStatus  DeliveryStatus  @default(PENDING) // PENDING, PREPARING, SHIPPED, IN_TRANSIT, DELIVERED
   gateway         String          // stripe, paystack, flutterwave
   gatewayTxId     String?         // External transaction ID
   customerEmail   String?
   customerPhone   String?
+  shippingAddress Json?           // Customer shipping address
+  trackingNumber  String?         // Order tracking number
+  estimatedDelivery DateTime?     // Estimated delivery date
+  actualDelivery  DateTime?       // Actual delivery date
+  notes           String?         // Order notes
   metadata        Json?           // Additional transaction data
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
@@ -200,6 +207,22 @@ enum TransactionStatus {
   COMPLETED
   FAILED
   CANCELLED
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum DeliveryStatus {
+  PENDING
+  PREPARING
+  SHIPPED
+  IN_TRANSIT
+  DELIVERED
 }
 
 enum OTPType {
