@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { products as api, Product, ApiError } from "@/lib/api";
-import { Package, Plus, Search, X, RefreshCw } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { products as api, Product, ApiError, uploadImage } from "@/lib/api";
+import { Package, Plus, Search, X, RefreshCw, ImagePlus, Loader2, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
 
 const CATEGORIES = [
@@ -72,6 +72,14 @@ function ProductCard({ product, onDelete }: { product: Product; onDelete: (id: s
   );
 }
 
+interface ImageItem {
+  file: File;
+  preview: string;
+  uploading: boolean;
+  url?: string;
+  error?: string;
+}
+
 function AddProductModal({ onClose, onAdded }: { onClose: () => void; onAdded: (p: Product) => void }) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -79,9 +87,49 @@ function AddProductModal({ onClose, onAdded }: { onClose: () => void; onAdded: (
   const [currency, setCurrency] = useState("USD");
   const [category, setCategory] = useState("Other");
   const [quantity, setQuantity] = useState("1");
-  const [tags, setTags] = useState("");
+  const [tagInput, setTagInput] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
+  const [images, setImages] = useState<ImageItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const isUploadingAny = images.some((i) => i.uploading);
+
+  function addTag(value: string) {
+    const tag = value.trim().toLowerCase();
+    if (tag && !tags.includes(tag) && tags.length < 8) {
+      setTags((prev) => [...prev, tag]);
+    }
+    setTagInput("");
+  }
+
+  async function handleFilesSelected(files: FileList | null) {
+    if (!files || files.length === 0) return;
+    const newItems: ImageItem[] = Array.from(files).map((file) => ({
+      file,
+      preview: URL.createObjectURL(file),
+      uploading: true,
+    }));
+    setImages((prev) => [...prev, ...newItems]);
+
+    for (const item of newItems) {
+      try {
+        const url = await uploadImage(item.file);
+        setImages((prev) =>
+          prev.map((i) => i.preview === item.preview ? { ...i, uploading: false, url } : i)
+        );
+      } catch {
+        setImages((prev) =>
+          prev.map((i) => i.preview === item.preview ? { ...i, uploading: false, error: "Failed" } : i)
+        );
+      }
+    }
+  }
+
+  function removeImage(preview: string) {
+    setImages((prev) => prev.filter((i) => i.preview !== preview));
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -89,8 +137,10 @@ function AddProductModal({ onClose, onAdded }: { onClose: () => void; onAdded: (
     if (!name.trim() || !price) { setError("Name and price are required."); return; }
     const priceNum = parseFloat(price);
     if (isNaN(priceNum) || priceNum <= 0) { setError("Enter a valid price."); return; }
+    if (isUploadingAny) { setError("Please wait for images to finish uploading."); return; }
     setLoading(true);
     try {
+      const uploadedUrls = images.filter((i) => i.url).map((i) => i.url!);
       const res = await api.create({
         name: name.trim(),
         description: description.trim(),
@@ -98,8 +148,8 @@ function AddProductModal({ onClose, onAdded }: { onClose: () => void; onAdded: (
         currency,
         category,
         quantity: parseInt(quantity) || 1,
-        tags: tags.split(",").map((t) => t.trim()).filter(Boolean),
-        images: [],
+        tags,
+        images: uploadedUrls,
       });
       onAdded(res.data);
       onClose();
@@ -110,37 +160,93 @@ function AddProductModal({ onClose, onAdded }: { onClose: () => void; onAdded: (
     }
   }
 
+  const inputCls = "w-full px-3 py-2 rounded-lg border border-slate-300 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500";
+  const selectCls = "w-full px-3 py-2 rounded-lg border border-slate-300 text-sm text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500";
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-          <h2 className="font-bold text-slate-900">Add Product</h2>
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 px-0 sm:px-4">
+      <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl w-full sm:max-w-lg max-h-[92vh] overflow-y-auto">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 sticky top-0 bg-white z-10">
+          <h2 className="font-bold text-slate-900 text-base">Add Product</h2>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-600"><X size={20} /></button>
         </div>
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-5">
           {error && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</p>}
+
+          {/* Image Picker */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">Product Photos</label>
+            <div className="grid grid-cols-3 gap-2">
+              {images.map((img) => (
+                <div key={img.preview} className="relative aspect-square rounded-xl overflow-hidden bg-slate-100">
+                  <Image src={img.preview} alt="preview" fill className="object-cover" unoptimized />
+                  {img.uploading && (
+                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                      <Loader2 size={20} className="text-white animate-spin" />
+                    </div>
+                  )}
+                  {!img.uploading && img.url && (
+                    <div className="absolute top-1 left-1 bg-emerald-500 rounded-md px-1.5 py-0.5">
+                      <CheckCircle2 size={10} className="text-white inline" />
+                    </div>
+                  )}
+                  {!img.uploading && img.error && (
+                    <div className="absolute top-1 left-1 bg-red-500 rounded-md px-1.5 py-0.5">
+                      <span className="text-white text-[10px] font-semibold">!</span>
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => removeImage(img.preview)}
+                    className="absolute top-1 right-1 w-5 h-5 bg-black/60 rounded-full flex items-center justify-center"
+                  >
+                    <X size={10} className="text-white" />
+                  </button>
+                </div>
+              ))}
+              {images.length < 6 && (
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="aspect-square rounded-xl border-2 border-dashed border-indigo-300 bg-indigo-50 flex flex-col items-center justify-center gap-1 hover:bg-indigo-100 transition-colors"
+                >
+                  <ImagePlus size={20} className="text-indigo-500" />
+                  <span className="text-[11px] text-indigo-500 font-medium">
+                    {images.length === 0 ? "Add Photos" : "Add More"}
+                  </span>
+                </button>
+              )}
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              multiple
+              className="hidden"
+              onChange={(e) => handleFilesSelected(e.target.files)}
+            />
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Name *</label>
             <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Product name"
-              className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              className={inputCls} />
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Description</label>
-            <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2}
-              placeholder="Short description"
-              className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none" />
+            <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3}
+              placeholder="Describe your product…"
+              className={`${inputCls} resize-none`} />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Price *</label>
               <input type="number" min="0" step="0.01" value={price} onChange={(e) => setPrice(e.target.value)}
-                placeholder="0.00"
-                className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                placeholder="0.00" className={inputCls} />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Currency</label>
-              <select value={currency} onChange={(e) => setCurrency(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+              <select value={currency} onChange={(e) => setCurrency(e.target.value)} className={selectCls}>
                 {CURRENCIES.map((c) => <option key={c}>{c}</option>)}
               </select>
             </div>
@@ -148,30 +254,54 @@ function AddProductModal({ onClose, onAdded }: { onClose: () => void; onAdded: (
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Category</label>
-              <select value={category} onChange={(e) => setCategory(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+              <select value={category} onChange={(e) => setCategory(e.target.value)} className={selectCls}>
                 {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
               </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Quantity</label>
               <input type="number" min="0" value={quantity} onChange={(e) => setQuantity(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                className={inputCls} />
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Tags <span className="text-slate-400 font-normal">(comma-separated)</span></label>
-            <input value={tags} onChange={(e) => setTags(e.target.value)} placeholder="tag1, tag2"
-              className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Tags <span className="text-slate-400 font-normal">(up to 8)</span>
+            </label>
+            <div className="flex gap-2">
+              <input
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === ",") { e.preventDefault(); addTag(tagInput); } }}
+                placeholder="e.g. wireless, bluetooth"
+                className={`${inputCls} flex-1`}
+              />
+              <button type="button" onClick={() => addTag(tagInput)}
+                className="px-3 py-2 rounded-lg bg-slate-100 text-slate-600 text-sm hover:bg-slate-200">
+                Add
+              </button>
+            </div>
+            {tags.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {tags.map((t) => (
+                  <span key={t} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-xs font-medium">
+                    {t}
+                    <button type="button" onClick={() => setTags((prev) => prev.filter((x) => x !== t))}>
+                      <X size={10} />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
           <div className="flex gap-3 pt-2">
             <button type="button" onClick={onClose}
-              className="flex-1 py-2 rounded-lg border border-slate-300 text-sm font-medium text-slate-700 hover:bg-slate-50">
+              className="flex-1 py-2.5 rounded-lg border border-slate-300 text-sm font-medium text-slate-700 hover:bg-slate-50">
               Cancel
             </button>
-            <button type="submit" disabled={loading}
-              className="flex-1 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 disabled:opacity-50">
-              {loading ? "Adding…" : "Add Product"}
+            <button type="submit" disabled={loading || isUploadingAny}
+              className="flex-1 py-2.5 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 disabled:opacity-50 flex items-center justify-center gap-2">
+              {loading ? <><Loader2 size={15} className="animate-spin" /> Saving…</> : "Add Product"}
             </button>
           </div>
         </form>
@@ -225,7 +355,7 @@ export default function ProductsPage() {
         </div>
         <button
           onClick={() => setShowAdd(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition-colors w-full sm:w-auto"
+          className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition-colors"
         >
           <Plus size={16} /> Add Product
         </button>
@@ -283,6 +413,15 @@ export default function ProductsPage() {
           ))}
         </div>
       )}
+
+      {/* Floating action button – mobile only */}
+      <button
+        onClick={() => setShowAdd(true)}
+        className="sm:hidden fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-indigo-600 text-white shadow-lg shadow-indigo-500/40 flex items-center justify-center hover:bg-indigo-700 transition-colors"
+        aria-label="Add product"
+      >
+        <Plus size={24} />
+      </button>
 
       {showAdd && (
         <AddProductModal

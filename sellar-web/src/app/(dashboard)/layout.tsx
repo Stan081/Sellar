@@ -77,7 +77,7 @@ export default function DashboardLayout({
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 lg:static lg:z-auto`}
       >
         <div className="flex items-center justify-between p-4 border-b border-slate-100">
-          <Logo />
+          <Logo href="/dashboard" />
           <button
             onClick={() => setSidebarOpen(false)}
             className="lg:hidden text-slate-400 hover:text-slate-600"

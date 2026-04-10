@@ -62,6 +62,36 @@ async function request<T>(
   return json;
 }
 
+// ── Upload ────────────────────────────────────────────────────────────────────
+
+export async function uploadImage(file: File): Promise<string> {
+  const token = getToken();
+  const formData = new FormData();
+  formData.append("image", file);
+
+  const headers: Record<string, string> = {};
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
+  const res = await fetch(`${BASE}/api/upload/image`, {
+    method: "POST",
+    body: formData,
+    headers,
+  });
+
+  if (res.status === 401) {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("sellar_token");
+      localStorage.removeItem("sellar_vendor");
+      window.location.href = "/login";
+    }
+    throw new ApiError(401, "Session expired. Please log in again.");
+  }
+
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) throw new ApiError(res.status, json.error ?? json.message ?? "Upload failed");
+  return json.url as string;
+}
+
 // ── Auth ──────────────────────────────────────────────────────────────────────
 
 export interface Vendor {
