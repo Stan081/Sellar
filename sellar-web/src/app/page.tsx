@@ -2,7 +2,6 @@ import Link from "next/link";
 import { 
   Zap, 
   Shield, 
-  TrendingUp, 
   CreditCard, 
   Users, 
   BarChart3,
@@ -13,6 +12,7 @@ import {
   Smartphone,
   Lock
 } from "lucide-react";
+import Logo from "@/components/Logo";
 
 export default function Home() {
   return (
@@ -21,26 +21,24 @@ export default function Home() {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-violet-500 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">S</span>
-              </div>
-              <span className="text-xl font-bold text-slate-900">Sellar</span>
-            </div>
+            <Logo />
             <div className="hidden md:flex items-center gap-8">
               <a href="#features" className="text-slate-600 hover:text-slate-900 transition-colors">Features</a>
               <a href="#how-it-works" className="text-slate-600 hover:text-slate-900 transition-colors">How it Works</a>
               <a href="#pricing" className="text-slate-600 hover:text-slate-900 transition-colors">Pricing</a>
             </div>
             <div className="flex items-center gap-4">
-              <span className="hidden sm:inline text-slate-600 text-sm">
-                Login via mobile app
-              </span>
               <Link 
-                href="#download-app" 
+                href="/login" 
+                className="text-slate-600 hover:text-slate-900 font-medium transition-colors"
+              >
+                Login
+              </Link>
+              <Link 
+                href="/register" 
                 className="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
               >
-                Get the App
+                Register
               </Link>
             </div>
           </div>
@@ -67,10 +65,10 @@ export default function Home() {
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link 
-                href="#download-app" 
+                href="/register" 
                 className="w-full sm:w-auto bg-indigo-500 hover:bg-indigo-600 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all hover:shadow-lg hover:shadow-indigo-500/25 flex items-center justify-center gap-2"
               >
-                Start on Mobile
+                Get Started
                 <ArrowRight className="w-5 h-5" />
               </Link>
               <a 
@@ -284,10 +282,10 @@ export default function Home() {
                   ))}
                 </ul>
                 <Link 
-                  href="#download-app" 
+                  href="/register" 
                   className="mt-8 w-full bg-indigo-500 hover:bg-indigo-600 text-white py-4 rounded-xl font-semibold text-lg transition-colors flex items-center justify-center gap-2"
                 >
-                  Download Mobile App
+                  Create Account
                   <ArrowRight className="w-5 h-5" />
                 </Link>
               </div>
@@ -299,14 +297,24 @@ export default function Home() {
       <section id="download-app" className="py-16 px-4 sm:px-6 lg:px-8 bg-indigo-50">
         <div className="max-w-4xl mx-auto text-center">
           <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-3">
-            Account setup and login are mobile-app only
+            Ready to start selling?
           </h3>
           <p className="text-slate-600 mb-6">
-            Vendors create and manage Sellar accounts from the mobile app. The web experience is for product info and customer checkout.
+            Create your account and start accepting payments in minutes.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-3">
-            <a href="#" className="bg-slate-900 text-white px-6 py-3 rounded-xl font-medium hover:bg-slate-800 transition-colors">Download on App Store</a>
-            <a href="#" className="bg-white text-slate-900 px-6 py-3 rounded-xl font-medium border border-slate-200 hover:bg-slate-50 transition-colors">Get it on Google Play</a>
+            <Link 
+              href="/register" 
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-medium transition-colors"
+            >
+              Create Account
+            </Link>
+            <Link 
+              href="/login" 
+              className="bg-white text-indigo-600 hover:bg-indigo-50 border border-indigo-200 px-6 py-3 rounded-xl font-medium transition-colors"
+            >
+              Sign In
+            </Link>
           </div>
         </div>
       </section>
@@ -321,10 +329,10 @@ export default function Home() {
             Join thousands of entrepreneurs who trust Sellar to power their business.
           </p>
           <Link 
-            href="#download-app" 
+            href="/register" 
             className="inline-flex items-center gap-2 bg-white hover:bg-slate-100 text-slate-900 px-8 py-4 rounded-xl font-semibold text-lg transition-colors"
           >
-            Download the Mobile App
+            Create Your Account
             <ArrowRight className="w-5 h-5" />
           </Link>
         </div>
@@ -334,19 +342,14 @@ export default function Home() {
       <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-slate-100">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-violet-500 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">S</span>
-              </div>
-              <span className="text-xl font-bold text-slate-900">Sellar</span>
-            </div>
+            <Logo />
             <div className="flex items-center gap-8 text-sm text-slate-600">
-              <a href="#" className="hover:text-slate-900 transition-colors">Privacy Policy</a>
-              <a href="#" className="hover:text-slate-900 transition-colors">Terms of Service</a>
-              <a href="#" className="hover:text-slate-900 transition-colors">Contact</a>
+              <Link href="/privacy" className="hover:text-slate-900 transition-colors">Privacy Policy</Link>
+              <Link href="/terms" className="hover:text-slate-900 transition-colors">Terms of Service</Link>
+              <a href="mailto:hello@sellar.app" className="hover:text-slate-900 transition-colors">Contact</a>
             </div>
             <div className="text-sm text-slate-500">
-              © {new Date().getFullYear()} Sellar. All rights reserved.
+              © 2026 Sellar. All rights reserved.
             </div>
           </div>
         </div>
